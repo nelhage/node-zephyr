@@ -9,8 +9,11 @@ def set_options(opt):
 def configure(conf):
   conf.check_tool('compiler_cxx')
   conf.check_tool('node_addon')
+  conf.env.append_value("LIB_ZEPHYR", "zephyr")
+
 
 def build(bld):
   obj = bld.new_task_gen('cxx', 'shlib', 'node_addon')
   obj.target = '_zephyr'
   obj.source = '_zephyr.cc'
+  obj.uselib = "ZEPHYR"
