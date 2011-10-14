@@ -66,19 +66,15 @@ protected:
     return args.This();
   }
 
-  static void EioFree (eio_req *req) {
-    free(req);
-  }
-
-  static void EioInit (eio_req *req) {
+  static int EioInit (eio_req *req) {
     req->result = ZInitialize();
+    return 0;
   }
 
   static int AfterInit (eio_req *req) {
     Connection *conn = static_cast<Connection*>(req->data);
-
-    ev_unref(EV_DEFAULT_UC);
     conn->AfterInit(req->result);
+
     return 0;
   }
 
@@ -88,21 +84,11 @@ protected:
       return;
     initialized_ = true;
 
-    eio_req *req = static_cast<eio_req*>(calloc(1, sizeof *req));
+    eio_req *req = eio_custom(EioInit, EIO_PRI_DEFAULT, AfterInit, this);
     if (req == NULL) {
       Error(ENOMEM);
       return;
     }
-
-    req->type    = EIO_CUSTOM;
-    req->pri     = EIO_PRI_DEFAULT;
-    req->finish  = AfterInit;
-    req->data    = this;
-    req->destroy = EioFree;
-    req->feed    = EioInit;
-
-    eio_submit(req);
-    ev_ref(EV_DEFAULT_UC);
 
     Ref();
   }
