@@ -66,9 +66,8 @@ protected:
     return args.This();
   }
 
-  static int EioInit (eio_req *req) {
+  static void EioInit (eio_req *req) {
     req->result = ZInitialize();
-    return 0;
   }
 
   static int AfterInit (eio_req *req) {
